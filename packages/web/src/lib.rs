@@ -1,0 +1,1 @@
+// Web frontend - planned for future Axum/Leptos implementation

@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: wowcompanion-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: wowcompanion
+    ports:
+      - "5432:5432"
+    volumes:
+      - wowcompanion-db-data:/var/lib/postgresql/data
+
+volumes:
+  wowcompanion-db-data:
