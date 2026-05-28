@@ -16,6 +16,12 @@ pub struct ApiConfig {
 
 #[derive(Debug, Error)]
 pub enum ApiError {
+    #[error("invalid input: {0}")]
+    InvalidInput(&'static str),
+    #[error("expected API data was missing: {0}")]
+    MissingData(String),
+    #[error("HTTP request failed: {0}")]
+    Request(#[from] reqwest::Error),
     #[error("API integration is not implemented yet")]
     NotImplemented,
 }

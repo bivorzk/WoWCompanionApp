@@ -5,6 +5,8 @@
 .env
 .env.*
 !.env.example
+examples/
+
 
 # Rust tooling
 **/*.rs.bk
