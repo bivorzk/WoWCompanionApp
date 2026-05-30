@@ -20,6 +20,8 @@ pub enum ApiError {
     InvalidInput(&'static str),
     #[error("expected API data was missing: {0}")]
     MissingData(String),
+    #[error("GraphQL request failed: {0}")]
+    GraphQl(String),
     #[error("HTTP request failed: {0}")]
     Request(#[from] reqwest::Error),
     #[error("API integration is not implemented yet")]
