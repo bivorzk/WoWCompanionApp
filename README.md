@@ -77,7 +77,7 @@ Copy-Item .env.example .env
 Required variables:
 
 ```env
-DATABASE_URL=postgres://postgres:password@localhost:5432/wowcompanion
+DATABASE_URL=postgres://postgres:password@localhost:5432/wowcompanion NOT NEEDED
 BLIZZARD_CLIENT_ID=
 BLIZZARD_CLIENT_SECRET=
 WCL_CLIENT_ID=
@@ -89,13 +89,6 @@ Notes:
 - Raider.IO does not require credentials.
 - Blizzard and Warcraft Logs credentials are loaded via `.env` fallback in the API crate.
 
-### 2. Start PostgreSQL
-
-The repository includes a local development database definition:
-
-```powershell
-docker compose up -d
-```
 
 ### 3. Build the workspace
 
