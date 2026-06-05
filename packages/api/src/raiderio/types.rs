@@ -1,5 +1,5 @@
 use crate::{ApiError, ApiResult};
-use serde::Deserialize;
+use serde::{Deserialize, Deserializer};
 use serde_json::Value;
 use std::collections::BTreeMap;
 
@@ -15,6 +15,44 @@ pub struct RaiderIoCharacterProfile {
     pub active_spec_name: Option<String>,
     pub thumbnail_url: Option<String>,
     pub achievement_points: Option<u32>,
+    #[serde(default)]
+    pub mythic_plus_recent_runs: Vec<RaiderIoKeystoneRun>,
+    #[serde(default, deserialize_with = "deserialize_single_or_vec")]
+    pub mythic_plus_scores_by_season: Vec<RaiderIoPublicMythicPlusScoresBySeason>,
+}
+
+#[derive(Clone, Debug, Default, Deserialize)]
+pub struct RaiderIoPublicMythicPlusScoresBySeason {
+    pub season: String,
+    pub scores: RaiderIoPublicRoleScores,
+    #[serde(flatten)]
+    pub extra_fields: RaiderIoExtraFields,
+}
+
+#[derive(Clone, Debug, Default, Deserialize)]
+pub struct RaiderIoPublicRoleScores {
+    #[serde(default)]
+    pub all: f64,
+    #[serde(flatten)]
+    pub extra_fields: RaiderIoExtraFields,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+#[serde(untagged)]
+enum RaiderIoOneOrMany<T> {
+    One(T),
+    Many(Vec<T>),
+}
+
+fn deserialize_single_or_vec<'de, D, T>(deserializer: D) -> Result<Vec<T>, D::Error>
+where
+    D: Deserializer<'de>,
+    T: Deserialize<'de>,
+{
+    match RaiderIoOneOrMany::<T>::deserialize(deserializer)? {
+        RaiderIoOneOrMany::One(value) => Ok(vec![value]),
+        RaiderIoOneOrMany::Many(values) => Ok(values),
+    }
 }
 
 #[derive(Clone, Debug, Default)]
@@ -87,7 +125,7 @@ impl RaiderIoCharacterOverviewQuery {
 #[serde(rename_all = "camelCase")]
 pub struct RaiderIoCharacterOverview {
     pub character_raid_progress: Option<RaiderIoCharacterRaidProgress>,
-    pub character_mythic_plus_progress: Option<RaiderIoCharacterMythicPlusProgress>,
+    pub character_mythic_plus_progress: Option<Value>,
     pub character_details: RaiderIoCharacterDetails,
     #[serde(flatten)]
     pub extra_sections: RaiderIoExtraFields,
@@ -106,12 +144,37 @@ pub struct RaiderIoCharacterRaidProgress {
 #[derive(Clone, Debug, Default, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RaiderIoRaidProgressEntry {
+    pub raid: Option<String>,
     pub summary: Option<String>,
     pub expansion_id: Option<u32>,
     pub total_bosses: Option<u32>,
     pub normal_bosses_killed: Option<u32>,
     pub heroic_bosses_killed: Option<u32>,
     pub mythic_bosses_killed: Option<u32>,
+    #[serde(default)]
+    pub encounters_defeated: RaiderIoRaidEncounterProgress,
+    #[serde(flatten)]
+    pub extra_fields: RaiderIoExtraFields,
+}
+
+#[derive(Clone, Debug, Default, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RaiderIoRaidEncounterProgress {
+    #[serde(default)]
+    pub normal: Vec<RaiderIoRaidEncounterKill>,
+    #[serde(default)]
+    pub heroic: Vec<RaiderIoRaidEncounterKill>,
+    #[serde(default)]
+    pub mythic: Vec<RaiderIoRaidEncounterKill>,
+}
+
+#[derive(Clone, Debug, Default, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RaiderIoRaidEncounterKill {
+    pub slug: Option<String>,
+    pub first_defeated: Option<String>,
+    pub last_defeated: Option<String>,
+    pub num_kills: Option<u32>,
     #[serde(flatten)]
     pub extra_fields: RaiderIoExtraFields,
 }
@@ -123,7 +186,7 @@ pub struct RaiderIoCharacterMythicPlusProgress {
     pub season: String,
     #[serde(default)]
     pub mythic_plus_scores: RaiderIoMythicPlusScoreBuckets,
-    pub best_mythic_plus_score: Option<f64>,
+    pub best_mythic_plus_score: Option<RaiderIoMythicPlusSeasonScore>,
     #[serde(default)]
     pub keystone_aggregate_stats: Vec<RaiderIoKeystoneAggregateStat>,
     pub previous_mythic_plus_score: Option<RaiderIoMythicPlusSeasonScore>,
@@ -198,20 +261,31 @@ pub struct RaiderIoSeasonSummary {
 }
 
 #[derive(Clone, Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
 pub struct RaiderIoKeystoneRun {
     pub dungeon: String,
+    #[serde(alias = "shortName")]
     pub short_name: String,
+    #[serde(alias = "mythicLevel")]
     pub mythic_level: u32,
+    #[serde(alias = "keystoneRunId")]
     pub keystone_run_id: u64,
+    #[serde(alias = "completedAt")]
     pub completed_at: String,
+    #[serde(alias = "clearTimeMs")]
     pub clear_time_ms: u64,
+    #[serde(alias = "parTimeMs")]
     pub par_time_ms: u64,
+    #[serde(alias = "numKeystoneUpgrades")]
     pub num_keystone_upgrades: u32,
+    #[serde(alias = "mapChallengeModeId")]
     pub map_challenge_mode_id: u32,
+    #[serde(alias = "zoneId")]
     pub zone_id: u32,
+    #[serde(alias = "zoneExpansionId")]
     pub zone_expansion_id: u32,
+    #[serde(alias = "iconUrl")]
     pub icon_url: String,
+    #[serde(alias = "backgroundImageUrl")]
     pub background_image_url: String,
     pub score: f64,
     pub url: String,

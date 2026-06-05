@@ -69,6 +69,88 @@ impl BlizzardClient {
         .await
     }
 
+    pub async fn fetch_character_equipment(&self, config: &ApiConfig, region: &str, realm_slug: &str, character_name: &str) -> ApiResult<CharacterEquipmentSummary> {
+        let realm_slug = normalize_profile_path_segment(realm_slug, "realm slug is required")?;
+        let character_name = normalize_profile_path_segment(character_name, "character name is required")?;
+
+        self.get_profile_json(
+            config,
+            region,
+            &[
+                "profile",
+                "wow",
+                "character",
+                realm_slug.as_str(),
+                character_name.as_str(),
+                "equipment",
+            ],
+            DEFAULT_BLIZZARD_LOCALE,
+        )
+        .await
+    }
+
+    pub async fn fetch_character_achievements(&self, config: &ApiConfig, region: &str, realm_slug: &str, character_name: &str) -> ApiResult<CharacterAchievementsSummary> {
+        let realm_slug = normalize_profile_path_segment(realm_slug, "realm slug is required")?;
+        let character_name = normalize_profile_path_segment(character_name, "character name is required")?;
+
+        self.get_profile_json(
+            config,
+            region,
+            &[
+                "profile",
+                "wow",
+                "character",
+                realm_slug.as_str(),
+                character_name.as_str(),
+                "achievements",
+            ],
+            DEFAULT_BLIZZARD_LOCALE,
+        )
+        .await
+    }
+
+    pub async fn fetch_character_mounts_collection(&self, config: &ApiConfig, region: &str, realm_slug: &str, character_name: &str) -> ApiResult<CharacterMountsCollection> {
+        let realm_slug = normalize_profile_path_segment(realm_slug, "realm slug is required")?;
+        let character_name = normalize_profile_path_segment(character_name, "character name is required")?;
+
+        self.get_profile_json(
+            config,
+            region,
+            &[
+                "profile",
+                "wow",
+                "character",
+                realm_slug.as_str(),
+                character_name.as_str(),
+                "collections",
+                "mounts",
+            ],
+            DEFAULT_BLIZZARD_LOCALE,
+        )
+        .await
+    }
+
+    pub async fn fetch_character_pets_collection(&self, config: &ApiConfig, region: &str, realm_slug: &str, character_name: &str) -> ApiResult<CharacterPetsCollection> {
+        let realm_slug = normalize_profile_path_segment(realm_slug, "realm slug is required")?;
+        let character_name = normalize_profile_path_segment(character_name, "character name is required")?;
+
+        self.get_profile_json(
+            config,
+            region,
+            &[
+                "profile",
+                "wow",
+                "character",
+                realm_slug.as_str(),
+                character_name.as_str(),
+                "collections",
+                "pets",
+            ],
+            DEFAULT_BLIZZARD_LOCALE,
+        )
+        .await
+    }
+
     pub async fn fetch_character_pvp_summary(&self, config: &ApiConfig, region: &str, realm_slug: &str, character_name: &str) -> ApiResult<CharacterPvPSummary> {
         let realm_slug = normalize_profile_path_segment(realm_slug, "realm slug is required")?;
         let character_name = normalize_profile_path_segment(character_name, "character name is required")?;

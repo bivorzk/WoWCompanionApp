@@ -45,12 +45,25 @@ impl RaiderIoClient {
     }
 
     pub async fn fetch_character_profile_by_ref(&self, character: &RaiderIoCharacter) -> ApiResult<RaiderIoCharacterProfile> {
+        self.fetch_character_profile_by_ref_with_fields(character, &[]).await
+    }
+
+    pub async fn fetch_character_profile_with_fields(&self, region: &str, realm: &str, name: &str, fields: &[&str]) -> ApiResult<RaiderIoCharacterProfile> {
+        let character = RaiderIoCharacter::new(region, realm, name);
+        self.fetch_character_profile_by_ref_with_fields(&character, fields).await
+    }
+
+    pub async fn fetch_character_profile_by_ref_with_fields(&self, character: &RaiderIoCharacter, fields: &[&str]) -> ApiResult<RaiderIoCharacterProfile> {
         let character = character.validated()?;
-        let query_pairs = vec![
+        let mut query_pairs = vec![
             ("region", character.region.to_string()),
             ("realm", character.realm.to_string()),
             ("name", character.name.to_string()),
         ];
+
+        if !fields.is_empty() {
+            query_pairs.push(("fields", fields.join(",")));
+        }
 
         self.get_public_api_json(&["characters", "profile"], &query_pairs)
             .await
@@ -81,6 +94,13 @@ impl RaiderIoClient {
     pub async fn fetch_character_mythic_plus_progress(&self, character: &RaiderIoCharacter, query: &RaiderIoCharacterOverviewQuery) -> ApiResult<RaiderIoCharacterMythicPlusProgress> {
         self.fetch_character_overview_projection(character, query, |overview| {
             require_data(overview.character_mythic_plus_progress, "character Mythic+ progress was missing from the overview payload")
+                .and_then(|value| {
+                    serde_json::from_value(value).map_err(|error| {
+                        ApiError::MissingData(format!(
+                            "character Mythic+ progress payload could not be decoded: {error}"
+                        ))
+                    })
+                })
         })
         .await
     }
@@ -128,6 +148,20 @@ impl RaiderIoClient {
         runs.extend(score_bucket.alternate_runs);
         runs.extend(score_bucket.raw_runs);
         runs.extend(score_bucket.raw_alternate_runs);
+
+        Ok(runs)
+    }
+
+    pub async fn fetch_character_recent_runs_from_score_bucket(&self, character: &RaiderIoCharacter, query: &RaiderIoCharacterOverviewQuery, bucket_key: &str) -> ApiResult<Vec<RaiderIoKeystoneRun>> {
+        let score_bucket = self.fetch_character_mythic_plus_score_bucket(character, query, bucket_key).await?;
+        let mut runs = score_bucket.raw_runs;
+
+        runs.extend(score_bucket.raw_alternate_runs);
+
+        if runs.is_empty() {
+            runs.extend(score_bucket.runs);
+            runs.extend(score_bucket.alternate_runs);
+        }
 
         Ok(runs)
     }

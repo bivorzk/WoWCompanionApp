@@ -1,0 +1,10 @@
+[application]
+name = "Wow Companion App"
+default_platform = "desktop"
+
+[web.app]
+title = "Wow Companion App"
+
+[bundle]
+identifier = "com.mycompany.wow_companion_app"
+publisher = "bivorzk"

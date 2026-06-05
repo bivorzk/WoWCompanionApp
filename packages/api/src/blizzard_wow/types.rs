@@ -384,3 +384,95 @@ pub struct BlizzardItemValueDisplayF64 {
     #[serde(flatten)]
     pub extra_fields: BlizzardExtraFields,
 }
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct CharacterEquipmentSummary {
+    #[serde(rename = "_links")]
+    pub links: BlizzardLinks,
+    pub character: BlizzardAppearanceCharacter,
+    #[serde(default)]
+    pub equipped_items: Vec<BlizzardEquippedItem>,
+    #[serde(flatten)]
+    pub extra_fields: BlizzardExtraFields,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct BlizzardEquippedItem {
+    pub item: BlizzardKeyedIdReference,
+    pub slot: BlizzardTypeName,
+    pub quality: BlizzardTypeName,
+    pub name: String,
+    pub media: BlizzardAppearanceMediaReference,
+    pub level: Option<BlizzardItemValueDisplayU32>,
+    #[serde(flatten)]
+    pub extra_fields: BlizzardExtraFields,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct CharacterAchievementsSummary {
+    #[serde(rename = "_links")]
+    pub links: BlizzardLinks,
+    pub total_quantity: u32,
+    pub total_points: u32,
+    pub character: BlizzardAppearanceCharacter,
+    #[serde(default)]
+    pub recent_events: Vec<BlizzardAchievementEvent>,
+    #[serde(flatten)]
+    pub extra_fields: BlizzardExtraFields,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct BlizzardAchievementEvent {
+    pub achievement: BlizzardAchievementReference,
+    pub timestamp: u64,
+    #[serde(flatten)]
+    pub extra_fields: BlizzardExtraFields,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct BlizzardAchievementReference {
+    pub key: BlizzardLink,
+    pub name: String,
+    pub id: u32,
+    #[serde(flatten)]
+    pub extra_fields: BlizzardExtraFields,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct CharacterMountsCollection {
+    #[serde(rename = "_links")]
+    pub links: BlizzardLinks,
+    pub character: BlizzardAppearanceCharacter,
+    #[serde(default)]
+    pub mounts: Vec<BlizzardCollectedMount>,
+    #[serde(flatten)]
+    pub extra_fields: BlizzardExtraFields,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct BlizzardCollectedMount {
+    pub mount: BlizzardAppearanceReference,
+    pub is_useable: bool,
+    #[serde(flatten)]
+    pub extra_fields: BlizzardExtraFields,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct CharacterPetsCollection {
+    #[serde(rename = "_links")]
+    pub links: BlizzardLinks,
+    pub character: BlizzardAppearanceCharacter,
+    #[serde(default)]
+    pub pets: Vec<BlizzardCollectedPet>,
+    #[serde(flatten)]
+    pub extra_fields: BlizzardExtraFields,
+}
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct BlizzardCollectedPet {
+    pub species: BlizzardAppearanceReference,
+    pub level: u32,
+    pub quality: BlizzardTypeName,
+    #[serde(flatten)]
+    pub extra_fields: BlizzardExtraFields,
+}
